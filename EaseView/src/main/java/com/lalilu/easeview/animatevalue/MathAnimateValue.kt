@@ -5,7 +5,7 @@ import kotlin.reflect.KProperty
 
 abstract class MathAnimateValue<T : Comparable<T>> : AnimateValue {
     abstract var value: T
-    private var needUpdate: Boolean = false
+    protected var needUpdate: Boolean = false
 
     abstract fun check(targetValue: T, value: T): Boolean
     abstract fun obtainTargetValue(): T

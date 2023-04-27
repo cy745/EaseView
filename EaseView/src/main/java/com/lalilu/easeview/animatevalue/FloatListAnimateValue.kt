@@ -1,19 +1,44 @@
 package com.lalilu.easeview.animatevalue
 
-class FloatListAnimateValue : AnimateValue {
-    private val list = LinkedHashMap<Int, FloatValue>()
+class FloatListAnimateValue(
+    val defaultTargetValue: Float = 0f,
+    precision: Float = 0.01f,
+    stepPercent: Float = 0.05f
+) : FloatValue(defaultTargetValue, precision, stepPercent) {
+    private val valueMap = LinkedHashMap<Int, Float>()
+    private val targetMap = LinkedHashMap<Int, Float>()
 
-    fun getValueByIndex(index: Int): Float {
-        return (list[index] ?: FloatValue(0f).also { list[index] = it }).value
+    fun getValueByIndex(index: Int): Float = valueMap[index] ?: 0f
+
+    fun getTargetValueByIndex(index: Int): Float {
+        if (targetMap[index] == null) {
+            targetMap[index] = defaultTargetValue
+        }
+        return targetMap[index]!!
     }
 
     fun updateTargetValue(index: Int, targetValue: Float) {
-        (list[index] ?: FloatValue(0f).also { list[index] = it }).targetValue = targetValue
+        targetMap[index] = targetValue
     }
 
-    override fun isNeedUpdate(): Boolean = list.values.any(AnimateValue::isNeedUpdate)
+    override fun isNeedUpdate(): Boolean = needUpdate || valueMap.any {
+        !check(getTargetValueByIndex(it.key), it.value)
+    }
+
+    private var targetValueTemp: Float = 0f
+    private var resultValueTemp: Float = 0f
 
     override fun update() {
-        list.values.forEach(AnimateValue::update)
+        for ((index, currentValue) in valueMap) {
+            targetValueTemp = getTargetValueByIndex(index)
+            resultValueTemp = interpolate(targetValue, currentValue)
+
+            valueMap[index] = if (!check(targetValue, resultValueTemp)) {
+                targetValue
+            } else {
+                needUpdate = true
+                resultValueTemp
+            }
+        }
     }
 }
