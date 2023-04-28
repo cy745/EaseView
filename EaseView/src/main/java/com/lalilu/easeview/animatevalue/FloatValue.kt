@@ -2,7 +2,6 @@ package com.lalilu.easeview.animatevalue
 
 import kotlin.math.abs
 
-
 open class FloatValue(
     var targetValue: Float,
     var precision: Float = 0.01f,
