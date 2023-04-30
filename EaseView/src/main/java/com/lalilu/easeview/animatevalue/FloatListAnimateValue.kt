@@ -12,21 +12,17 @@ class FloatListAnimateValue(
         private var targetValueTemp: Float = 0f
         private var resultValueTemp: Float = 0f
 
-        override fun isNeedUpdate(): Boolean {
-            return needUpdate || valueMap.any { !check(getTargetValueByIndex(it.key), it.value) }
-        }
-
         override fun update() {
+            needUpdate = false
             for ((index, currentValue) in valueMap) {
                 targetValueTemp = getTargetValueByIndex(index)
+                if (currentValue == targetValueTemp) continue
+
+                needUpdate = true
                 resultValueTemp = interpolate(targetValueTemp, currentValue)
 
-                valueMap[index] = if (!check(targetValueTemp, resultValueTemp)) {
-                    targetValueTemp
-                } else {
-                    needUpdate = true
-                    resultValueTemp
-                }
+                valueMap[index] = if (!check(targetValueTemp, resultValueTemp)) targetValueTemp
+                else resultValueTemp
             }
         }
     }
